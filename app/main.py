@@ -4,6 +4,8 @@ from fastapi import FastAPI
 from app.api.jobs import router as job_router
 from app.database.init_db import init_db
 from app.api.search import router as search_router
+from app.api.score import router as score_router
+from app.api.candidate import router as candidate_router
 
 
 @asynccontextmanager
@@ -19,6 +21,8 @@ app = FastAPI(
 
 app.include_router(job_router)
 app.include_router(search_router)
+app.include_router(score_router)
+app.include_router(candidate_router)
 
 
 @app.get("/")

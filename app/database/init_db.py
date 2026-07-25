@@ -1,4 +1,5 @@
 from app.database.database import Base, engine
+from app.models.candidate import Candidate
 
 import app.models.job
 

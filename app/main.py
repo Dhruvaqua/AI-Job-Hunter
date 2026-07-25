@@ -1,0 +1,31 @@
+from contextlib import asynccontextmanager
+from fastapi import FastAPI
+
+from app.api.jobs import router as job_router
+from app.database.init_db import init_db
+from app.api.search import router as search_router
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    init_db()
+    yield
+
+
+app = FastAPI(
+    title="AI Job Hunter",
+    lifespan=lifespan,
+)
+
+app.include_router(job_router)
+app.include_router(search_router)
+
+
+@app.get("/")
+def home():
+    return {"message": "AI Job Hunter API"}
+
+
+@app.get("/health")
+def health():
+    return {"status": "healthy"}

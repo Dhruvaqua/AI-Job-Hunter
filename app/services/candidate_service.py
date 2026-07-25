@@ -5,17 +5,51 @@ from app.models.candidate import Candidate
 from app.schemas.candidate import CandidateCreate
 from app.ai.scoring_engine import ScoringEngine
 from app.models.job import Job
+from app.services.resume_service import ResumeService
 
 
 class CandidateService:
 
     @staticmethod
+    def create_or_update_from_resume(db: Session, resume_data: dict):
+        candidate = (
+            db.query(Candidate)
+            .filter(Candidate.name == resume_data["name"])
+            .first()
+        )
+
+        skills = ",".join(resume_data["skills"])
+
+        if candidate:
+            candidate.location = "Remote"
+            candidate.experience = resume_data["experience"]
+            candidate.skills = skills
+
+            db.commit()
+            db.refresh(candidate)
+            return candidate
+
+        candidate = Candidate(
+            name=resume_data["name"],
+            location="Remote",
+            experience=resume_data["experience"],
+            skills=skills,
+        )
+
+        db.add(candidate)
+        db.commit()
+        db.refresh(candidate)
+
+        return candidate
+
+    @staticmethod
     def create_candidate(db: Session, candidate: CandidateCreate):
         db_candidate = Candidate(
-            name=candidate.name,
-            location=candidate.location,
-            skills=",".join(candidate.skills),
-        )
+        name=candidate.name,
+        location=candidate.location,
+        experience=candidate.experience,
+        skills=",".join(candidate.skills),
+    )
 
         db.add(db_candidate)
         db.commit()
@@ -30,13 +64,14 @@ class CandidateService:
             .filter(Candidate.id == candidate_id)
             .first()
         )
-        
+
     @staticmethod
     def get_recommended_jobs(db: Session, candidate_id: int):
         candidate = CandidateService.get_candidate(db, candidate_id)
 
         if not candidate:
             return None
+
         candidate_data = {
             "skills": candidate.skills.split(","),
             "location": candidate.location,
@@ -56,13 +91,15 @@ class CandidateService:
                 },
             )
 
-            recommendations.append({
-                "job_id": job.id,
-                "title": job.title,
-                "company": job.company,
-                "location": job.location,
-                **result
-            })
+            recommendations.append(
+                {
+                    "job_id": job.id,
+                    "title": job.title,
+                    "company": job.company,
+                    "location": job.location,
+                    **result,
+                }
+            )
 
         recommendations.sort(key=lambda x: x["score"], reverse=True)
 

@@ -1,9 +1,9 @@
 import streamlit as st
 
 from api import (
-    ai_explain,
     get_candidates,
     get_jobs,
+    ai_explain,
 )
 
 st.title("🤖 AI Career Assistant")
@@ -11,19 +11,28 @@ st.title("🤖 AI Career Assistant")
 candidates = get_candidates()
 jobs = get_jobs()
 
+if not candidates:
+    st.warning("No candidates found.")
+    st.stop()
+
+if not jobs:
+    st.warning("No jobs found.")
+    st.stop()
+
+
 candidate = st.selectbox(
-    "Candidate",
+    "Select Candidate",
     candidates,
     format_func=lambda x: x["name"],
 )
 
 job = st.selectbox(
-    "Job",
+    "Select Job",
     jobs,
     format_func=lambda x: f'{x["title"]} - {x["company"]}',
 )
 
-if st.button("Generate AI Analysis", use_container_width=True):
+if st.button("Generate AI Explanation"):
 
     with st.spinner("Thinking..."):
 
@@ -32,6 +41,6 @@ if st.button("Generate AI Analysis", use_container_width=True):
             job["id"],
         )
 
-    st.success("Analysis Complete")
+    st.success("Done")
 
-    st.write(result["response"])
+    st.markdown(result["ai_explanation"])

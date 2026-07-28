@@ -5,9 +5,17 @@ from api import (
     get_recommendations,
 )
 
-st.title("🎯 Job Recommendations")
+st.title("🎯 AI Recommendations")
 
 candidates = get_candidates()
+
+if not isinstance(candidates, list):
+    st.error(candidates)
+    st.stop()
+
+if len(candidates) == 0:
+    st.warning("Upload a resume first.")
+    st.stop()
 
 candidate = st.selectbox(
     "Candidate",
@@ -15,22 +23,38 @@ candidate = st.selectbox(
     format_func=lambda x: x["name"],
 )
 
-if st.button("Find Jobs", use_container_width=True):
+if st.button("Generate Recommendations"):
 
-    jobs = get_recommendations(candidate["id"])
+    jobs = get_recommendations(
+        candidate["id"]
+    )
 
-    for job in jobs[:20]:
+    for job in jobs[:10]:
 
-        with st.container():
+        with st.expander(
+            f'{job["title"]} ({job["company"]})'
+        ):
 
-            st.subheader(job["title"])
+            st.metric(
+                "Match Score",
+                f'{job["score"]}%'
+            )
 
-            st.write(job["company"])
+            st.write(
+                job["recommendation"]
+            )
 
-            st.progress(job["score"] / 100)
+            st.write("Strengths")
 
-            st.write(f"**Score:** {job['score']}")
+            for item in job["strengths"]:
+                st.success(item)
 
-            st.write(f"**Recommendation:** {job['recommendation']}")
+            st.write("Missing Skills")
 
-            st.divider()
+            for item in job["missing_skills"]:
+                st.warning(item)
+
+            st.write("Improvements")
+
+            for item in job["improvements"]:
+                st.info(item)

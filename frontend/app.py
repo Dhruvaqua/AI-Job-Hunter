@@ -2,67 +2,38 @@ import streamlit as st
 
 st.set_page_config(
     page_title="AI Job Hunter",
-    page_icon="🤖",
+    page_icon="🚀",
     layout="wide",
 )
 
-st.title("🤖 AI Job Hunter")
+st.title("🚀 AI Job Hunter")
 
 st.markdown("---")
 
-c1, c2 = st.columns(2)
-
-with c1:
-
-    st.info(
-        """
-### 📄 Resume
-
-- Upload Resume
-- Parse PDF
-- Extract Skills
-- Store Candidate
+st.markdown(
 """
-    )
+### Features
 
-    st.success(
-        """
-### 💼 Jobs
+✅ Search jobs from Greenhouse
 
-- Import Jobs
-- Search Jobs
-- Filter Jobs
+✅ Search jobs from Lever
+
+✅ Store jobs locally
+
+✅ Resume Upload
+
+✅ ATS Resume Analysis
+
+✅ AI Resume Advisor
+
+✅ Candidate Recommendations
+
+✅ AI Career Assistant
+
+✅ Dashboard
+
+---
+
+Use the sidebar to navigate through the application.
 """
-    )
-
-with c2:
-
-    st.warning(
-        """
-### 🎯 AI
-
-- Match Resume
-- ATS Score
-- Recommendations
-"""
-    )
-
-    st.error(
-        """
-### 🤖 LLM
-
-- Explain Match
-- Resume Advice
-- Career Guidance
-"""
-    )
-
-st.markdown("---")
-
-st.header("Project Status")
-
-st.progress(0.80)
-
-st.write("**80% Complete**")
-
-st.caption("Use the left sidebar to explore the application.")
+)

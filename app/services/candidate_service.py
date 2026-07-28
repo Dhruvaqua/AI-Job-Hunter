@@ -1,11 +1,9 @@
 from sqlalchemy.orm import Session
 
-from app.models import candidate
 from app.models.candidate import Candidate
+from app.models.job import Job
 from app.schemas.candidate import CandidateCreate
 from app.ai.scoring_engine import ScoringEngine
-from app.models.job import Job
-from app.services.resume_service import ResumeService
 
 
 class CandidateService:
@@ -27,6 +25,7 @@ class CandidateService:
 
             db.commit()
             db.refresh(candidate)
+
             return candidate
 
         candidate = Candidate(
@@ -41,15 +40,19 @@ class CandidateService:
         db.refresh(candidate)
 
         return candidate
+    
+    @staticmethod
+    def get_all_candidates(db: Session):
+        return db.query(Candidate).all()
 
     @staticmethod
     def create_candidate(db: Session, candidate: CandidateCreate):
         db_candidate = Candidate(
-        name=candidate.name,
-        location=candidate.location,
-        experience=candidate.experience,
-        skills=",".join(candidate.skills),
-    )
+            name=candidate.name,
+            location=candidate.location,
+            experience=candidate.experience,
+            skills=",".join(candidate.skills),
+        )
 
         db.add(db_candidate)
         db.commit()
@@ -63,6 +66,22 @@ class CandidateService:
             db.query(Candidate)
             .filter(Candidate.id == candidate_id)
             .first()
+        )
+
+    @staticmethod
+    def get_job_score(candidate_data: dict, job: Job):
+        return ScoringEngine.score(
+            candidate=candidate_data,
+            job={
+                "title": job.title,
+                "description": job.description or "",
+                "location": job.location or "",
+                "required_skills": (
+                    job.required_skills.split(",")
+                    if job.required_skills
+                    else []
+                ),
+            },
         )
 
     @staticmethod
@@ -82,13 +101,9 @@ class CandidateService:
         recommendations = []
 
         for job in jobs:
-            result = ScoringEngine.score(
-                candidate=candidate_data,
-                job={
-                    "title": job.title,
-                    "description": job.description or "",
-                    "location": job.location or "",
-                },
+            result = CandidateService.get_job_score(
+                candidate_data,
+                job,
             )
 
             recommendations.append(
@@ -97,10 +112,17 @@ class CandidateService:
                     "title": job.title,
                     "company": job.company,
                     "location": job.location,
-                    **result,
+                    "score": result["score"],
+                    "recommendation": result["recommendation"],
+                    "strengths": result["strengths"],
+                    "missing_skills": result["missing_skills"],
+                    "improvements": result["improvements"],
                 }
             )
 
-        recommendations.sort(key=lambda x: x["score"], reverse=True)
+        recommendations.sort(
+            key=lambda x: x["score"],
+            reverse=True,
+        )
 
         return recommendations

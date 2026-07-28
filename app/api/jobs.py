@@ -7,7 +7,10 @@ from app.database.session import get_db
 from app.schemas.job import JobCreate, JobResponse
 from app.services.job_service import JobService
 
-router = APIRouter(prefix="/jobs", tags=["Jobs"])
+router = APIRouter(
+    prefix="/jobs",
+    tags=["Jobs"],
+)
 
 
 @router.get("/", response_model=list[JobResponse])
@@ -32,6 +35,9 @@ def get_jobs(
 
 
 @router.post("/", response_model=JobResponse)
-def create_job(job: JobCreate, db: Session = Depends(get_db)):
+def create_job(
+    job: JobCreate,
+    db: Session = Depends(get_db),
+):
     created_job, _ = JobService.create_job(db, job)
     return created_job

@@ -8,14 +8,13 @@ class Job(Base):
 
     id = Column(Integer, primary_key=True, index=True)
 
-    title = Column(String(255), nullable=False)
+    title = Column(String, nullable=False)
+    company = Column(String, nullable=False)
+    location = Column(String)
+    salary = Column(String)
 
-    company = Column(String(255), nullable=False)
-
-    location = Column(String(255), nullable=True)
-
-    salary = Column(String(255), nullable=True)
-
-    url = Column(String(500), unique=True, nullable=False)
+    url = Column(String, unique=True, nullable=False)
 
     description = Column(Text, nullable=True)
+
+    required_skills = Column(Text, nullable=True)

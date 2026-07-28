@@ -4,21 +4,31 @@ from app.schemas.job import JobCreate
 from app.services.greenhouse_service import GreenhouseService
 from app.services.job_service import JobService
 from app.services.lever_service import LeverService
+from app.services.web_scraper import WebScraper
+from app.ai.skill_extractor import SkillExtractor
 
 
 class SearchService:
     @staticmethod
     def import_jobs(db: Session, jobs: list[dict]) -> dict:
-        """
-        Save jobs into the database while tracking
-        new jobs and duplicates.
-        """
 
         jobs_saved = 0
         duplicates = 0
 
         for job in jobs:
-            _, created = JobService.create_job(db, JobCreate(**job))
+
+            description = WebScraper.fetch_job_description(job["url"])
+
+            job["description"] = description
+
+            job["required_skills"] = ",".join(
+                SkillExtractor.extract(description)
+            )
+
+            _, created = JobService.create_job(
+             db,
+                JobCreate(**job)
+            )
 
             if created:
                 jobs_saved += 1

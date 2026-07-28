@@ -1,14 +1,16 @@
-from pydantic import BaseModel, HttpUrl
 from typing import Optional
+
+from pydantic import BaseModel, HttpUrl
 
 
 class JobCreate(BaseModel):
     title: str
     company: str
-    location: Optional[str] = None
+    location: str
     salary: Optional[str] = None
     url: HttpUrl
     description: Optional[str] = None
+    required_skills: Optional[str] = None
 
 
 class JobResponse(JobCreate):

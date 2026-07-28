@@ -7,6 +7,10 @@ from app.services.candidate_service import CandidateService
 
 router = APIRouter(prefix="/candidate", tags=["Candidate"])
 
+@router.get("/")
+def get_candidates(db: Session = Depends(get_db)):
+    return CandidateService.get_all_candidates(db)
+
 
 @router.post("/", response_model=CandidateResponse)
 def create_candidate(candidate: CandidateCreate, db: Session = Depends(get_db)):

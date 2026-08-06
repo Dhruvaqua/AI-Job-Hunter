@@ -10,6 +10,7 @@ from app.api.resume import router as resume_router
 from app.api.ats import router as ats_router
 from app.api.resume_advisor import router as advisor_router
 from app.api.ai import router as ai_router
+from app.api.system import router as system_router
 
 
 @asynccontextmanager
@@ -31,6 +32,7 @@ app.include_router(resume_router)
 app.include_router(ats_router)
 app.include_router(advisor_router)
 app.include_router(ai_router)
+app.include_router(system_router)
 
 
 @app.get("/")

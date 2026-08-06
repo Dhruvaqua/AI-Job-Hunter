@@ -1,61 +1,96 @@
 import streamlit as st
+import pandas as pd
 
-from api import (
-    get_jobs,
-    get_candidates,
-)
+from api import get_jobs, get_candidates
+from utils import load_css, sidebar
+
+load_css()
+sidebar()
 
 st.title("📊 Dashboard")
+st.caption("Overview of your AI Job Hunter platform")
 
 jobs = get_jobs()
 candidates = get_candidates()
 
-st.metric(
+total_jobs = len(jobs)
+total_candidates = len(candidates)
+
+recommended = 0
+average_score = 0
+
+scores = []
+
+if candidates:
+
+    candidate = candidates[0]
+
+    from api import get_recommendations
+
+    recommendations = get_recommendations(candidate["id"])
+
+    if isinstance(recommendations, list):
+
+        recommended = len(
+            [r for r in recommendations if r["score"] >= 80]
+        )
+
+        scores = [r["score"] for r in recommendations]
+
+        if scores:
+            average_score = sum(scores) / len(scores)
+
+col1, col2, col3, col4 = st.columns(4)
+
+col1.metric(
     "Jobs",
-    len(jobs),
+    total_jobs,
 )
 
-st.metric(
+col2.metric(
     "Candidates",
-    len(candidates),
+    total_candidates,
+)
+
+col3.metric(
+    "Recommended",
+    recommended,
+)
+
+col4.metric(
+    "Average Match",
+    f"{average_score:.0f}%"
 )
 
 st.divider()
 
-companies = {}
+if scores:
 
-for job in jobs:
+    df = pd.DataFrame(
+        {
+            "Score": scores
+        }
+    )
 
-    company = job["company"]
+    st.subheader("Recommendation Score Distribution")
 
-    companies[company] = companies.get(company, 0) + 1
-
-st.subheader("Top Companies")
-
-for company, count in sorted(
-    companies.items(),
-    key=lambda x: x[1],
-    reverse=True,
-)[:10]:
-
-    st.write(f"**{company}** — {count} jobs")
+    st.bar_chart(df)
 
 st.divider()
 
-locations = {}
+if jobs:
 
-for job in jobs:
+    st.subheader("Latest Jobs")
 
-    location = job["location"]
+    latest = pd.DataFrame(jobs[:10])
 
-    locations[location] = locations.get(location, 0) + 1
-
-st.subheader("Top Locations")
-
-for location, count in sorted(
-    locations.items(),
-    key=lambda x: x[1],
-    reverse=True,
-)[:10]:
-
-    st.write(f"**{location}** — {count} jobs")
+    st.dataframe(
+        latest[
+            [
+                "title",
+                "company",
+                "location",
+            ]
+        ],
+        use_container_width=True,
+    )

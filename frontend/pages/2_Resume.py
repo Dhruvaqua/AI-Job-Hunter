@@ -1,4 +1,8 @@
 import streamlit as st
+from utils import load_css, sidebar
+
+load_css()
+sidebar()
 
 from api import upload_resume
 
@@ -30,3 +34,9 @@ if resume:
         st.write("### Skills")
 
         st.write(", ".join(candidate["skills"]))
+        
+    st.success("✅ Resume uploaded successfully!")
+
+st.balloons()
+
+st.toast("Candidate profile created!")

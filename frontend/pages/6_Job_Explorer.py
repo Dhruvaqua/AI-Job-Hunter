@@ -1,5 +1,9 @@
 import streamlit as st
 
+from utils import load_css, sidebar
+
+load_css()
+sidebar()
 from api import get_jobs
 
 st.set_page_config(page_title="Job Explorer", page_icon="💼")

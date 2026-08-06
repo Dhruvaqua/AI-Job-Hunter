@@ -35,3 +35,38 @@ def ai_explain(candidate_id, job_id):
     return requests.get(
         f"{BASE_URL}/ai/candidate/{candidate_id}/job/{job_id}"
     ).json()
+
+
+def resume_tailor(candidate_id, job_id):
+    return requests.post(
+        f"{BASE_URL}/ai/resume-tailor",
+        json={
+            "candidate_id": candidate_id,
+            "job_id": job_id,
+        },
+    ).json()
+
+
+def interview_questions(candidate_id, job_id):
+    return requests.post(
+        f"{BASE_URL}/ai/interview",
+        json={
+            "candidate_id": candidate_id,
+            "job_id": job_id,
+        },
+    ).json()
+
+
+def learning_roadmap(candidate_id, job_id):
+    return requests.post(
+        f"{BASE_URL}/ai/roadmap",
+        json={
+            "candidate_id": candidate_id,
+            "job_id": job_id,
+        },
+    ).json()
+    
+def system_health():
+    return requests.get(
+        f"{BASE_URL}/system/health"
+    ).json()

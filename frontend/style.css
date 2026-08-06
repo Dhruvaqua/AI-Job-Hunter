@@ -1,0 +1,62 @@
+/* Hide Streamlit Branding */
+
+#MainMenu {
+    visibility: hidden;
+}
+
+footer {
+    visibility: hidden;
+}
+
+header {
+    visibility: hidden;
+}
+
+/* Main */
+
+.main {
+    background: #0f172a;
+}
+
+/* Sidebar */
+
+section[data-testid="stSidebar"] {
+    background-color: #111827;
+    border-right: 1px solid #374151;
+}
+
+/* Titles */
+
+h1,h2,h3{
+    color:white;
+}
+
+/* Metric cards */
+
+div[data-testid="metric-container"]{
+    background:#1f2937;
+    border-radius:15px;
+    padding:15px;
+    border:1px solid #374151;
+}
+
+/* Buttons */
+
+.stButton>button{
+    width:100%;
+    border-radius:10px;
+    height:45px;
+    background:#2563eb;
+    color:white;
+    border:none;
+}
+
+.stButton>button:hover{
+    background:#1d4ed8;
+}
+
+/* Text input */
+
+.stTextInput>div>div>input{
+    border-radius:10px;
+}

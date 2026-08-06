@@ -4,57 +4,91 @@ from api import (
     get_candidates,
     get_recommendations,
 )
+from utils import load_css, sidebar
+
+load_css()
+sidebar()
 
 st.title("🎯 AI Recommendations")
 
 candidates = get_candidates()
 
-if not isinstance(candidates, list):
-    st.error(candidates)
-    st.stop()
-
-if len(candidates) == 0:
-    st.warning("Upload a resume first.")
+if not candidates:
+    st.warning("No candidates found. Upload a resume first.")
     st.stop()
 
 candidate = st.selectbox(
-    "Candidate",
+    "Select Candidate",
     candidates,
     format_func=lambda x: x["name"],
 )
 
-if st.button("Generate Recommendations"):
+if st.button(
+    "Generate Recommendations",
+    use_container_width=True,
+):
 
-    jobs = get_recommendations(
-        candidate["id"]
-    )
+    with st.spinner("Finding best matches..."):
 
-    for job in jobs[:10]:
+        recommendations = get_recommendations(
+            candidate["id"]
+        )
+
+    if isinstance(recommendations, dict):
+        st.error(recommendations)
+        st.stop()
+
+    st.success(f"Found {len(recommendations)} matching jobs")
+
+    st.divider()
+
+    for job in recommendations[:20]:
+
+        if job["score"] >= 90:
+            badge = "🟢 Excellent"
+
+        elif job["score"] >= 75:
+            badge = "🟡 Good"
+
+        else:
+            badge = "🔴 Weak"
 
         with st.expander(
-            f'{job["title"]} ({job["company"]})'
+            f"{badge} {job['title']} • {job['score']}%"
         ):
 
-            st.metric(
-                "Match Score",
-                f'{job["score"]}%'
-            )
+            col1, col2 = st.columns([3, 1])
 
-            st.write(
-                job["recommendation"]
-            )
+            with col1:
 
-            st.write("Strengths")
+                st.write(f"### {job['title']}")
+                st.write(f"🏢 {job['company']}")
+                st.write(f"📍 {job['location']}")
+                st.write(f"Recommendation: **{job['recommendation']}**")
 
-            for item in job["strengths"]:
-                st.success(item)
+            with col2:
 
-            st.write("Missing Skills")
+                st.metric(
+                    "Score",
+                    f"{job['score']}%"
+                )
 
-            for item in job["missing_skills"]:
-                st.warning(item)
+            if job["strengths"]:
+                st.success("\n".join(job["strengths"]))
 
-            st.write("Improvements")
+            if job["missing_skills"]:
+                st.warning(
+                    "Missing Skills:\n\n"
+                    + "\n".join(job["missing_skills"])
+                )
 
-            for item in job["improvements"]:
-                st.info(item)
+            if job["improvements"]:
+                st.info(
+                    "\n".join(job["improvements"])
+                )
+
+st.divider()
+
+st.caption(
+    "AI Job Hunter • Built with FastAPI • Streamlit • Ollama"
+)

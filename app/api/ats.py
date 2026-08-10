@@ -42,26 +42,9 @@ def ats_score(request: ATSRequest, db: Session = Depends(get_db)):
             "title": job.title,
             "description": job.description or "",
             "location": job.location or "",
+            "required_skills": (job.required_skills or "").split(","),
         },
     )
-
-    strengths = []
-
-    if result["matched_skills"]:
-        strengths.append("Strong skill match")
-
-    if result["breakdown"]["experience"] > 0:
-        strengths.append("Experience matches job")
-
-    if result["breakdown"]["location"] > 0:
-        strengths.append("Location compatible")
-
-    weaknesses = []
-
-    if result["missing_skills"]:
-        weaknesses.append(
-            "Missing: " + ", ".join(result["missing_skills"])
-        )
 
     return {
         "candidate": candidate.name,
@@ -70,7 +53,7 @@ def ats_score(request: ATSRequest, db: Session = Depends(get_db)):
         "recommendation": result["recommendation"],
         "matched_skills": result["matched_skills"],
         "missing_skills": result["missing_skills"],
-        "strengths": strengths,
-        "weaknesses": weaknesses,
+        "strengths": result["strengths"],
+        "weaknesses": result["improvements"],
         "breakdown": result["breakdown"],
     }

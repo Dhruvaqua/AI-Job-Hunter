@@ -1,15 +1,7 @@
-import re
-
-
 class ScoringEngine:
 
     @staticmethod
     def score(candidate: dict, job: dict):
-
-        score = 0
-        strengths = []
-        missing = []
-        improvements = []
 
         candidate_skills = {
             s.lower().strip()
@@ -23,62 +15,62 @@ class ScoringEngine:
             if s.strip()
         }
 
-        matched = candidate_skills & job_skills
-        missing = sorted(job_skills - candidate_skills)
+        matched_skills = sorted(candidate_skills & job_skills)
+        missing_skills = sorted(job_skills - candidate_skills)
 
         if job_skills:
-            skill_score = int((len(matched) / len(job_skills)) * 70)
+            skill_score = int((len(matched_skills) / len(job_skills)) * 70)
         else:
             skill_score = 0
 
-        score += skill_score
+        candidate_location = candidate.get("location", "").lower().strip()
+        job_location = job.get("location", "").lower().strip()
 
-        if matched:
-            strengths.append(
-                f"Matched {len(matched)} required skills."
-            )
-
-        candidate_location = (
-            candidate.get("location", "").lower()
-        )
-
-        job_location = (
-            job.get("location", "").lower()
-        )
-
-        if (
-            "remote" in job_location
-            or candidate_location in job_location
-        ):
-            score += 20
-            strengths.append("Location matches.")
+        if "remote" in job_location or (candidate_location and candidate_location in job_location):
+            location_score = 20
         else:
-            improvements.append(
-                "Location preference does not match."
-            )
+            location_score = 0
 
-        title = (
-            job.get("title", "").lower()
-        )
+        experience = candidate.get("experience", 0) or 0
+        experience_score = 10 if experience >= 1 else 0
 
-        if "software" in title or "engineer" in title:
-            score += 10
+        score = min(skill_score + location_score + experience_score, 100)
 
-        score = min(score, 100)
+        breakdown = {
+            "skills": skill_score,
+            "location": location_score,
+            "experience": experience_score,
+        }
+
+        strengths = []
+        if matched_skills:
+            strengths.append(f"Matched {len(matched_skills)} required skills.")
+        if location_score:
+            strengths.append("Location matches.")
+        if experience_score:
+            strengths.append("Experience matches job.")
+
+        improvements = []
+        if missing_skills:
+            improvements.append("Missing: " + ", ".join(missing_skills))
+        if not location_score:
+            improvements.append("Location preference does not match.")
+        if not experience_score:
+            improvements.append("Gain more relevant professional or internship experience.")
 
         if score >= 80:
             recommendation = "Apply"
-
         elif score >= 60:
             recommendation = "Maybe"
-
         else:
             recommendation = "Skip"
 
         return {
             "score": score,
             "recommendation": recommendation,
+            "matched_skills": matched_skills,
+            "missing_skills": missing_skills,
             "strengths": strengths,
-            "missing_skills": missing,
             "improvements": improvements,
+            "breakdown": breakdown,
         }

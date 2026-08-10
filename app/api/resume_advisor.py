@@ -36,25 +36,11 @@ def improve_resume(request: ATSRequest, db: Session = Depends(get_db)):
             "title": job.title,
             "description": job.description or "",
             "location": job.location or "",
+            "required_skills": (job.required_skills or "").split(","),
         },
     )
 
-    suggestions = []
-
-    for skill in result["missing_skills"]:
-        suggestions.append(
-            f"Add experience or projects demonstrating {skill}."
-        )
-
-    if result["breakdown"]["experience"] == 0:
-        suggestions.append(
-            "Gain more relevant professional or internship experience."
-        )
-
-    if result["breakdown"]["location"] == 0:
-        suggestions.append(
-            "Consider remote opportunities or update preferred location."
-        )
+    suggestions = list(result["improvements"])
 
     return {
         "ats_score": result["score"],

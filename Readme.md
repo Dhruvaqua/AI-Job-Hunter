@@ -290,6 +290,15 @@ Software Engineer passionate about Backend Development, AI Applications, and Aut
 
 ---
 
+# Quick note
+
+Dear programmer,
+When i wrote this code, only god and I know how it works.
+Now, only god knows.
+If you are trying to optimize this Project and it fails, which it surely will. Please increase the  counter for the next person as a warning.
+
+Total_hours_wasted:125
+
 # License
 
 MIT License

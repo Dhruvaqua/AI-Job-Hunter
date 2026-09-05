@@ -3,10 +3,12 @@ from sqlalchemy.orm import Session
 
 from app.database.session import get_db
 from app.services.search_service import SearchService
+from app.security import require_api_key
 
 router = APIRouter(
     prefix="/search",
     tags=["Search"],
+    dependencies=[Depends(require_api_key)],
 )
 
 

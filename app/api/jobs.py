@@ -6,10 +6,12 @@ from sqlalchemy.orm import Session
 from app.database.session import get_db
 from app.schemas.job import JobCreate, JobResponse
 from app.services.job_service import JobService
+from app.security import require_api_key
 
 router = APIRouter(
     prefix="/jobs",
     tags=["Jobs"],
+    dependencies=[Depends(require_api_key)],
 )
 
 

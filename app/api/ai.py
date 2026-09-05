@@ -10,10 +10,12 @@ from app.ai.ai_explainer import AIExplainer
 from app.ai.tailor_resume_ai import ResumeTailorAI
 from app.ai.interview_ai import InterviewAI
 from app.ai.roadmap_ai import RoadmapAI
+from app.security import require_api_key
 
 router = APIRouter(
     prefix="/ai",
     tags=["AI"],
+    dependencies=[Depends(require_api_key)],
 )
 
 

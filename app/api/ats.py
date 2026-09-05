@@ -6,8 +6,9 @@ from app.models.candidate import Candidate
 from app.models.job import Job
 from app.schemas.ats import ATSRequest
 from app.ai.scoring_engine import ScoringEngine
+from app.security import require_api_key
 
-router = APIRouter(prefix="/ats", tags=["ATS"])
+router = APIRouter(prefix="/ats", tags=["ATS"], dependencies=[Depends(require_api_key)])
 
 
 @router.post("/score")

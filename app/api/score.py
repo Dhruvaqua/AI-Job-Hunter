@@ -5,8 +5,13 @@ from app.database.session import get_db
 from app.models.job import Job
 from app.schemas.score import ScoreRequest
 from app.ai.scoring_engine import ScoringEngine
+from app.security import require_api_key
 
-router = APIRouter(prefix="/score", tags=["Score"])
+router = APIRouter(
+    prefix="/score",
+    tags=["Score"],
+    dependencies=[Depends(require_api_key)],
+)
 
 
 @router.post("/")

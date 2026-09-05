@@ -1,5 +1,11 @@
 import re
+
 import pdfplumber
+
+from app.config import (
+    MAX_RESUME_PAGES,
+    MAX_RESUME_TEXT_LENGTH,
+)
 
 
 TECH_STACK = {
@@ -39,31 +45,66 @@ class ResumeService:
 
     @staticmethod
     def extract_text(file_path: str) -> str:
-        text = ""
+        text_parts = []
 
         with pdfplumber.open(file_path) as pdf:
-            for page in pdf.pages:
+
+            for page_number, page in enumerate(
+                pdf.pages,
+                start=1,
+            ):
+
+                if page_number > MAX_RESUME_PAGES:
+                    break
+
                 page_text = page.extract_text()
 
                 if page_text:
-                    text += page_text + "\n"
+                    text_parts.append(
+                        page_text
+                    )
 
-        return text
+                current_length = sum(
+                    len(part)
+                    for part in text_parts
+                )
+
+                if current_length >= MAX_RESUME_TEXT_LENGTH:
+                    break
+
+        text = "\n".join(text_parts)
+
+        return text[:MAX_RESUME_TEXT_LENGTH]
 
     @staticmethod
     def parse_resume(text: str):
-        email = ResumeService.extract_email(text)
-        phone = ResumeService.extract_phone(text)
-        skills = ResumeService.extract_skills(text)
-        experience = ResumeService.extract_experience(text)
+        email = ResumeService.extract_email(
+            text
+        )
 
-        name = text.split("\n")[0].strip()
+        phone = ResumeService.extract_phone(
+            text
+        )
+
+        skills = ResumeService.extract_skills(
+            text
+        )
+
+        experience = ResumeService.extract_experience(
+            text
+        )
+
+        name = (
+            text.split("\n")[0].strip()
+            if text.strip()
+            else "Unknown"
+        )
 
         return {
-            "name": name,
-            "email": email,
-            "phone": phone,
-            "skills": skills,
+            "name": name[:200],
+            "email": email[:254],
+            "phone": phone[:50],
+            "skills": skills[:50],
             "experience": experience,
         }
 
@@ -73,7 +114,12 @@ class ResumeService:
             r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}",
             text,
         )
-        return match.group(0) if match else ""
+
+        return (
+            match.group(0)
+            if match
+            else ""
+        )
 
     @staticmethod
     def extract_phone(text: str):
@@ -81,17 +127,24 @@ class ResumeService:
             r"(\+?\d[\d\s\-]{8,}\d)",
             text,
         )
-        return match.group(0) if match else ""
+
+        return (
+            match.group(0)
+            if match
+            else ""
+        )
 
     @staticmethod
     def extract_skills(text: str):
         lower = text.lower()
 
-        return sorted([
-            tech
-            for tech in TECH_STACK
-            if tech in lower
-        ])
+        return sorted(
+            [
+                tech
+                for tech in TECH_STACK
+                if tech in lower
+            ]
+        )
 
     @staticmethod
     def extract_experience(text: str):
@@ -103,4 +156,6 @@ class ResumeService:
         if not matches:
             return 0
 
-        return max(map(int, matches))
+        return max(
+            map(int, matches)
+        )

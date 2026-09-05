@@ -4,10 +4,12 @@ from sqlalchemy.orm import Session
 from app.database.session import get_db
 from app.schemas.candidate import CandidateCreate, CandidateResponse
 from app.services.candidate_service import CandidateService
+from app.security import require_api_key
 
 router = APIRouter(
     prefix="/candidate",
     tags=["Candidate"],
+    dependencies=[Depends(require_api_key)]
 )
 
 

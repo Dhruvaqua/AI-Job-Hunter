@@ -1,6 +1,17 @@
-import requests
+import os
 
-BASE_URL = "http://127.0.0.1:8000"
+import requests
+import streamlit as st
+
+
+def _resolve_base_url():
+    try:
+        return st.secrets["BASE_URL"]
+    except Exception:
+        return os.getenv("BASE_URL", "http://127.0.0.1:8000")
+
+
+BASE_URL = _resolve_base_url()
 
 
 def get_jobs():
@@ -65,7 +76,8 @@ def learning_roadmap(candidate_id, job_id):
             "job_id": job_id,
         },
     ).json()
-    
+
+
 def system_health():
     return requests.get(
         f"{BASE_URL}/system/health"

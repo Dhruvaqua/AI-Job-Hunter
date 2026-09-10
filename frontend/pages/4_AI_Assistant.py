@@ -1,9 +1,6 @@
 import streamlit as st
 
 from utils import load_css, sidebar
-
-load_css()
-sidebar()
 from api import (
     ai_explain,
     get_candidates,
@@ -13,12 +10,35 @@ from api import (
     resume_tailor,
 )
 
-st.set_page_config(page_title="AI Assistant", layout="wide")
+
+st.set_page_config(
+    page_title="AI Assistant",
+    layout="wide",
+)
+
+load_css()
+sidebar()
 
 st.title("🤖 AI Career Assistant")
 
-candidates = get_candidates()
-jobs = get_jobs()
+try:
+    candidates = get_candidates()
+    jobs = get_jobs()
+
+except Exception as e:
+    st.error(f"Unable to load data from backend: {e}")
+    st.stop()
+
+
+if not candidates:
+    st.warning("No candidates found. Please upload a resume first.")
+    st.stop()
+
+
+if not jobs:
+    st.warning("No jobs found. Please collect or add jobs first.")
+    st.stop()
+
 
 candidate = st.selectbox(
     "Candidate",
@@ -32,6 +52,7 @@ job = st.selectbox(
     format_func=lambda x: f'{x["title"]} - {x["company"]}',
 )
 
+
 tab1, tab2, tab3, tab4 = st.tabs(
     [
         "Job Analysis",
@@ -41,57 +62,86 @@ tab1, tab2, tab3, tab4 = st.tabs(
     ]
 )
 
+
 with tab1:
 
-    if st.button("Analyze Job", use_container_width=True):
+    if st.button(
+        "Analyze Job",
+        use_container_width=True,
+    ):
 
-        with st.spinner("Thinking..."):
+        with st.spinner("Analyzing job..."):
 
-            result = ai_explain(
-                candidate["id"],
-                job["id"],
-            )
+            try:
+                result = ai_explain(
+                    candidate["id"],
+                    job["id"],
+                )
 
-        st.markdown(result["response"])
+                st.markdown(result["response"])
+
+            except Exception as e:
+                st.error(f"AI analysis failed: {e}")
 
 
 with tab2:
 
-    if st.button("Tailor Resume", use_container_width=True):
+    if st.button(
+        "Tailor Resume",
+        use_container_width=True,
+    ):
 
-        with st.spinner("Generating..."):
+        with st.spinner("Generating tailored resume advice..."):
 
-            result = resume_tailor(
-                candidate["id"],
-                job["id"],
-            )
+            try:
+                result = resume_tailor(
+                    candidate["id"],
+                    job["id"],
+                )
 
-        st.markdown(result["response"])
+                st.markdown(result["response"])
+
+            except Exception as e:
+                st.error(f"Resume tailoring failed: {e}")
 
 
 with tab3:
 
-    if st.button("Generate Interview Questions", use_container_width=True):
+    if st.button(
+        "Generate Interview Questions",
+        use_container_width=True,
+    ):
 
-        with st.spinner("Preparing interview..."):
+        with st.spinner("Preparing interview questions..."):
 
-            result = interview_questions(
-                candidate["id"],
-                job["id"],
-            )
+            try:
+                result = interview_questions(
+                    candidate["id"],
+                    job["id"],
+                )
 
-        st.markdown(result["response"])
+                st.markdown(result["response"])
+
+            except Exception as e:
+                st.error(f"Interview preparation failed: {e}")
 
 
 with tab4:
 
-    if st.button("Generate Learning Roadmap", use_container_width=True):
+    if st.button(
+        "Generate Learning Roadmap",
+        use_container_width=True,
+    ):
 
-        with st.spinner("Planning roadmap..."):
+        with st.spinner("Building learning roadmap..."):
 
-            result = learning_roadmap(
-                candidate["id"],
-                job["id"],
-            )
+            try:
+                result = learning_roadmap(
+                    candidate["id"],
+                    job["id"],
+                )
 
-        st.markdown(result["response"])
+                st.markdown(result["response"])
+
+            except Exception as e:
+                st.error(f"Learning roadmap generation failed: {e}")

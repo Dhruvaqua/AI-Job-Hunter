@@ -15,14 +15,14 @@ router = APIRouter(
 )
 
 
-@router.get("/", response_model=list[JobResponse])
+@router.get("/")
 def get_jobs(
-    company: Optional[str] = Query(default=None),
-    location: Optional[str] = Query(default=None),
-    keyword: Optional[str] = Query(default=None),
-    page: int = Query(default=1, ge=1),
-    limit: int = Query(default=20, ge=1, le=100),
-    sort: str = Query(default="latest"),
+    company: Optional[str] = None,
+    location: Optional[str] = None,
+    keyword: Optional[str] = None,
+    page: int = Query(1, ge=1, le=1000),
+    limit: int = Query(20, ge=1, le=100),
+    sort: str = Query("latest", pattern="^(latest|oldest)$"),
     db: Session = Depends(get_db),
 ):
     return JobService.get_jobs(

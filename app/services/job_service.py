@@ -1,3 +1,4 @@
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.models.job import Job
@@ -8,7 +9,6 @@ class JobService:
 
     @staticmethod
     def create_job(db: Session, job: JobCreate):
-
         existing = (
             db.query(Job)
             .filter(Job.url == str(job.url))
@@ -19,16 +19,20 @@ class JobService:
             return existing, False
 
         data = job.model_dump()
-
         data["url"] = str(data["url"])
 
         db_job = Job(**data)
 
-        db.add(db_job)
-        db.commit()
-        db.refresh(db_job)
+        try:
+            db.add(db_job)
+            db.commit()
+            db.refresh(db_job)
 
-        return db_job, True
+            return db_job, True
+
+        except SQLAlchemyError:
+            db.rollback()
+            raise
 
     @staticmethod
     def get_jobs(
@@ -43,10 +47,14 @@ class JobService:
         query = db.query(Job)
 
         if company:
-            query = query.filter(Job.company.ilike(f"%{company}%"))
+            query = query.filter(
+                Job.company.ilike(f"%{company}%")
+            )
 
         if location:
-            query = query.filter(Job.location.ilike(f"%{location}%"))
+            query = query.filter(
+                Job.location.ilike(f"%{location}%")
+            )
 
         if keyword:
             query = query.filter(
@@ -60,7 +68,8 @@ class JobService:
             query = query.order_by(Job.id.asc())
 
         return (
-            query.offset((page - 1) * limit)
+            query
+            .offset((page - 1) * limit)
             .limit(limit)
             .all()
         )

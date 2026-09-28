@@ -9,39 +9,29 @@ GREENHOUSE_BOARDS = [
     "discord",
 ]
 
-
 class GreenhouseService:
     BASE_URL = "https://boards-api.greenhouse.io/v1/boards"
 
     @classmethod
     def fetch_jobs(cls):
         jobs = []
-
         for company in GREENHOUSE_BOARDS:
             try:
-                url = f"{cls.BASE_URL}/{company}/jobs"
-
-                response = requests.get(url, timeout=10)
-
-                if response.status_code != 200:
-                    continue
-
-                data = response.json()
-
-                for job in data.get("jobs", []):
-
-                    jobs.append(
-                        {
-                            "title": job["title"],
-                            "company": company.capitalize(),
-                            "location": job["location"]["name"],
-                            "salary": None,
-                            "url": job["absolute_url"],
-                            "description": None,
-                        }
-                    )
-
+                response = requests.get(
+                    f"{cls.BASE_URL}/{company}/jobs",
+                    params={"content": "true"},
+                    timeout=20,
+                )
+                response.raise_for_status()
+                for item in response.json().get("jobs", []):
+                    jobs.append({
+                        "title": item.get("title") or "",
+                        "company": company.capitalize(),
+                        "location": (item.get("location") or {}).get("name") or "Unspecified",
+                        "salary": None,
+                        "url": item.get("absolute_url"),
+                        "description": item.get("content") or "",
+                    })
             except Exception:
-                logger.exception(f"Failed to fetch jobs for {company}")
-
+                logger.exception("Failed to fetch Greenhouse jobs for %s", company)
         return jobs

@@ -5,6 +5,7 @@ from app.database.session import get_db
 from app.services.search_service import SearchService
 from app.security import require_api_key
 
+
 router = APIRouter(
     prefix="/search",
     tags=["Search"],
@@ -20,6 +21,15 @@ def search_greenhouse(db: Session = Depends(get_db)):
 @router.post("/lever")
 def search_lever(db: Session = Depends(get_db)):
     return SearchService.search_lever(db)
+
+
+@router.post("/himalayas")
+def search_himalayas(
+    keyword: str | None = None,
+    country: str | None = "India",
+    db: Session = Depends(get_db),
+):
+    return SearchService.search_himalayas(db, keyword=keyword, country=country)
 
 
 @router.post("/all")
